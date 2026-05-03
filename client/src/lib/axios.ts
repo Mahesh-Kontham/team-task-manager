@@ -1,9 +1,11 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
-  withCredentials: true, // Important for cookies
+  baseURL: import.meta.env.VITE_API_URL + "/api",
+  withCredentials: true,
 });
+
+console.log("API URL:", api.defaults.baseURL);
 
 // Interceptor to handle 401 and refresh token
 api.interceptors.response.use(
