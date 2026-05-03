@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import prisma from "../utils/prisma";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { getString } from "../utils/helpers";
 
 const projectSchema = z.object({
   name: z.string().min(2),
@@ -57,7 +58,8 @@ export const createProject = async (req: AuthRequest, res: Response, next: NextF
 
 export const getProjectById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getString(req.params.id);
+    if (!id) return res.status(400).json({ success: false, message: "Invalid id" });
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
@@ -78,7 +80,8 @@ export const getProjectById = async (req: AuthRequest, res: Response, next: Next
 
 export const updateProject = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getString(req.params.id);
+    if (!id) return res.status(400).json({ success: false, message: "Invalid id" });
     const { name, description } = projectSchema.parse(req.body);
 
     const project = await prisma.project.update({
@@ -94,7 +97,8 @@ export const updateProject = async (req: AuthRequest, res: Response, next: NextF
 
 export const deleteProject = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getString(req.params.id);
+    if (!id) return res.status(400).json({ success: false, message: "Invalid id" });
     await prisma.project.delete({ where: { id } });
     res.json({ success: true, message: "Project deleted successfully" });
   } catch (error) {

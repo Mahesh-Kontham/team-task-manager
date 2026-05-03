@@ -34,7 +34,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   console.error(err);
   
   if (err instanceof ZodError) {
-    const errorMessages = err.errors.map((issue: any) => `${issue.path.join('.')}: ${issue.message}`).join(", ");
+    const errorMessages = err.issues.map((issue: any) => `${issue.path.join('.')}: ${issue.message}`).join(", ");
     return res.status(400).json({
       success: false,
       error: errorMessages,

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
 import prisma from "../utils/prisma";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { getString } from "../utils/helpers";
 
 const taskSchema = z.object({
   title: z.string().min(1),
@@ -14,8 +15,12 @@ const taskSchema = z.object({
 
 export const getTasks = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { projectId } = req.params;
-    const { status, assigneeId, dueDate } = req.query;
+    const projectId = getString(req.params.projectId);
+    if (!projectId) return res.status(400).json({ success: false, message: "Invalid projectId" });
+
+    const status = getString(req.query.status);
+    const assigneeId = getString(req.query.assigneeId);
+    const dueDate = getString(req.query.dueDate);
 
     const filters: any = { projectId };
 
@@ -23,7 +28,7 @@ export const getTasks = async (req: AuthRequest, res: Response, next: NextFuncti
     if (assigneeId) filters.assigneeId = assigneeId;
     if (dueDate) {
       filters.dueDate = {
-        lte: new Date(dueDate as string),
+        lte: new Date(dueDate),
       };
     }
 
@@ -44,7 +49,8 @@ export const getTasks = async (req: AuthRequest, res: Response, next: NextFuncti
 
 export const createTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { projectId } = req.params;
+    const projectId = getString(req.params.projectId);
+    if (!projectId) return res.status(400).json({ success: false, message: "Invalid projectId" });
     const createdById = req.user!.id;
     const data = taskSchema.parse(req.body);
 
@@ -67,7 +73,8 @@ export const createTask = async (req: AuthRequest, res: Response, next: NextFunc
 
 export const getTaskById = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { taskId } = req.params;
+    const taskId = getString(req.params.taskId);
+    if (!taskId) return res.status(400).json({ success: false, message: "Invalid taskId" });
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: {
@@ -86,7 +93,8 @@ export const getTaskById = async (req: AuthRequest, res: Response, next: NextFun
 
 export const updateTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { taskId } = req.params;
+    const taskId = getString(req.params.taskId);
+    if (!taskId) return res.status(400).json({ success: false, message: "Invalid taskId" });
     const data = taskSchema.parse(req.body);
 
     const task = await prisma.task.update({
@@ -105,7 +113,8 @@ export const updateTask = async (req: AuthRequest, res: Response, next: NextFunc
 
 export const deleteTask = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { taskId } = req.params;
+    const taskId = getString(req.params.taskId);
+    if (!taskId) return res.status(400).json({ success: false, message: "Invalid taskId" });
     await prisma.task.delete({ where: { id: taskId } });
     res.json({ success: true, message: "Task deleted successfully" });
   } catch (error) {

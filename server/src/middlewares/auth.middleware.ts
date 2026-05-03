@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt";
 import prisma from "../utils/prisma";
+import { getString } from "../utils/helpers";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -11,7 +12,7 @@ export interface AuthRequest extends Request {
 
 export const isAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const token = req.cookies.accessToken;
+    const token = getString(req.cookies.accessToken);
     if (!token) {
       return res.status(401).json({ success: false, error: "Unauthorized: No token provided" });
     }
@@ -27,7 +28,7 @@ export const isAuth = async (req: AuthRequest, res: Response, next: NextFunction
 export const isProjectMember = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.id;
-    const projectId = req.params.projectId || req.params.id;
+    const projectId = getString(req.params.projectId) || getString(req.params.id);
 
     if (!userId || !projectId) {
       return res.status(400).json({ success: false, error: "Missing user or project info" });
@@ -52,7 +53,7 @@ export const isProjectMember = async (req: AuthRequest, res: Response, next: Nex
 export const isProjectAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.user?.id;
-    const projectId = req.params.projectId || req.params.id;
+    const projectId = getString(req.params.projectId) || getString(req.params.id);
 
     if (!userId || !projectId) {
       return res.status(400).json({ success: false, error: "Missing user or project info" });
