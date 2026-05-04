@@ -12,7 +12,7 @@ import projectRoutes from "./routes/project.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 
 app.use(cors({
-  origin: process.env.VITE_API_URL || "http://localhost:5173",
+  origin: ["https://team-task-manager-beta-amber.vercel.app", "http://localhost:5173"],
   credentials: true,
 }));
 
